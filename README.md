@@ -8,7 +8,7 @@ For more information see the [Darknet project website](http://pjreddie.com/darkn
 For questions or issues please use the [Google Group](https://groups.google.com/forum/#!forum/darknet).
 
 # Dependencies
-1-OpenCV 3.1.
+1-OpenCV 3.1 to handle video and image I/O.
 
 # Updates
 ## The following updates were made to Darknet's Implementation of YOLO:
