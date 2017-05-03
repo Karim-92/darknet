@@ -13,7 +13,9 @@ For questions or issues please use the [Google Group](https://groups.google.com/
 # Updates
 ## The following updates were made to Darknet's Implementation of YOLO:
 1- Added code to batch process and save images at once, instead of asking the user for each image seperately and saving it statically in the root directory with a static name.
+
 2-Modified the code to handle video I/O Properly.
+
 3-Added a script to parse udacity annotations.
 
 
