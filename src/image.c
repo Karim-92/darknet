@@ -451,6 +451,28 @@ void show_image_cv(image p, const char *name)
         cvReleaseImage(&buffer);
     }
     cvShowImage(buff, disp);
+    cvReleaseImage(&disp);    cvShowImage(buff, disp);
+	{
+		CvSize size;
+		{
+			size.width = disp->width, size.height = disp->height;
+		}
+
+		static CvVideoWriter* output_video = NULL;    // cv::VideoWriter output_video;
+		if (output_video == NULL)
+		{
+			printf("\n SRC output_video = %p \n", output_video);
+			const char* output_name = "output_video.mp4";
+			//output_video = cvCreateVideoWriter(output_name, CV_FOURCC('H', '2', '6', '4'), 25, size, 1);
+			output_video = cvCreateVideoWriter(output_name, CV_FOURCC('D', 'I', 'V', 'X'), 25, size, 1);
+			//output_video = cvCreateVideoWriter(output_name, CV_FOURCC('M', 'J', 'P', 'G'), 25, size, 1);
+			printf("\n cvCreateVideoWriter, DST output_video = %p  \n", output_video);
+		}
+
+		cvWriteFrame(output_video, disp);
+		printf("\n cvWriteFrame \n");
+	}
+
     cvReleaseImage(&disp);
 }
 #endif
@@ -529,7 +551,7 @@ void save_image_jpg(image p, const char *name)
     int x,y,k;
 
     char buff[256];
-    sprintf(buff, "%s.jpg", name);
+    sprintf(buff, "%s", name);
 
     IplImage *disp = cvCreateImage(cvSize(p.w,p.h), IPL_DEPTH_8U, p.c);
     int step = disp->widthStep;
@@ -548,9 +570,10 @@ void save_image_jpg(image p, const char *name)
 
 void save_image_png(image im, const char *name)
 {
+    int index = 0;
     char buff[256];
     //sprintf(buff, "%s (%d)", name, windows);
-    sprintf(buff, "%s.png", name);
+    sprintf(buff, "%s", name);
     unsigned char *data = calloc(im.w*im.h*im.c, sizeof(char));
     int i,k;
     for(k = 0; k < im.c; ++k){
@@ -560,6 +583,7 @@ void save_image_png(image im, const char *name)
     }
     int success = stbi_write_png(buff, im.w, im.h, im.c, data, im.w*im.c);
     free(data);
+    index++;
     if(!success) fprintf(stderr, "Failed to write image %s\n", buff);
 }
 

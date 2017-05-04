@@ -580,12 +580,18 @@ void validate_detector_recall(char *cfgfile, char *weightfile)
     }
 }
 
-void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh, float hier_thresh, char *outfile, int fullscreen)
+void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *outfolder, char *filename, float thresh, float hier_thresh, int fullscreen)
 {
     list *options = read_data_cfg(datacfg);
     char *name_list = option_find_str(options, "names", "data/names.list");
     char **names = get_labels(name_list);
+    printf("%s\n",datacfg);
 
+    // get labels for input images
+    char *inputs_list = option_find_str(options, "inputs", "data/inputs.names");
+    char **inputs_files = get_labels(inputs_list);
+
+    printf("%s\n",inputs_files[0]);
     image **alphabet = load_alphabet();
     network net = parse_network_cfg(cfgfile);
     if(weightfile){
@@ -598,15 +604,22 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
     char *input = buff;
     int j;
     float nms=.4;
+    int file_index=0;
     while(1){
         if(filename){
             strncpy(input, filename, 256);
         } else {
-            printf("Enter Image Path: ");
-            fflush(stdout);
-            input = fgets(input, 256, stdin);
+            //printf("Enter Image Path: ");
+            //fflush(stdout);
+            //input = fgets(input, 256, stdin);
+            //if(!input) return;
+            //strtok(input, "\n");
+
+            input = inputs_files[file_index];
+            printf("%s\n",input );
             if(!input) return;
             strtok(input, "\n");
+            
         }
         image im = load_image_color(input,0,0);
         image sized = letterbox_image(im, net.w, net.h);
@@ -628,11 +641,13 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         if (nms) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         //else if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         draw_detections(im, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes);
-        if(outfile){
-            save_image(im, outfile);
+        char outfilename[256];
+        sprintf(outfilename,"%s/%s",outfolder,inputs_files[file_index]);
+        if(outfolder){
+            save_image(im, outfilename);
         }
         else{
-            save_image(im, "predictions");
+            save_image(im, outfilename);
 #ifdef OPENCV
             cvNamedWindow("predictions", CV_WINDOW_NORMAL); 
             if(fullscreen){
@@ -649,6 +664,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         free(boxes);
         free_ptrs((void **)probs, l.w*l.h*l.n);
         if (filename) break;
+        file_index++;
     }
 }
 
@@ -697,7 +713,7 @@ void run_detector(int argc, char **argv)
     char *cfg = argv[4];
     char *weights = (argc > 5) ? argv[5] : 0;
     char *filename = (argc > 6) ? argv[6]: 0;
-    if(0==strcmp(argv[2], "test")) test_detector(datacfg, cfg, weights, filename, thresh, hier_thresh, outfile, fullscreen);
+    if(0==strcmp(argv[2], "test")) test_detector(datacfg, cfg, weights, outfile, filename, thresh, hier_thresh, fullscreen);
     else if(0==strcmp(argv[2], "train")) train_detector(datacfg, cfg, weights, gpus, ngpus, clear);
     else if(0==strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights, outfile);
     else if(0==strcmp(argv[2], "valid2")) validate_detector_flip(datacfg, cfg, weights, outfile);
