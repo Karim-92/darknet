@@ -5,19 +5,19 @@ import os
 from os.path import join
 
 
-classes = ["car", "truck"]
+classes = ["car"]
 textPath="labels/"
 annotationsPath="annotations/"
 
 # Size is a tuple of [width, height]
-# Box is a list containing [xmin, xmax, ymin, ymax]
+# Box is a list containing [xmin, ymin, xmax, ymax]
 def convert(size, box):
     dw = 1./size[0]
     dh = 1./size[1]
-    x = (box[0] + box[1])/2.0
-    y = (box[2] + box[3])/2.0
-    w = box[1] - box[0]
-    h = box[3] - box[2]
+    x = (box[0] + box[2])/2.0
+    y = (box[1] + box[3])/2.0
+    w = box[2] - box[0]
+    h = box[3] - box[1]
     x = x*dw
     w = w*dw
     y = y*dh
@@ -36,9 +36,9 @@ def convertAnnotations(image_id, W, H):
             if row[0]==image_id:
                 for i in range(0,len(row)/5):
                     c= int(row[(i*5)+5])
-                    if c not in [1, 3, 4]:
+                    if c not in [1, 2, 3, 4]:
                         cl.append(c)
-                        coord.append((row[i*5+1],row[i*5+3],row[i*5+2],row[i*5+4]))
+                        coord.append((row[i*5+1],row[i*5+2],row[i*5+3],row[i*5+4]))
                     else:
                         continue
 
@@ -48,8 +48,8 @@ def convertAnnotations(image_id, W, H):
             h=int(coord[i][3])-int(coord[i][2])
             if cl[i] == 0:
                 out_file.write("0 \n" + " ".join([str(a) for a in b]) +'\n')
-            elif cl[i]==2:
-                out_file.write("1 \n" + " ".join([str(a) for a in b]) +'\n')
+##            elif cl[i]==2:
+##                out_file.write("1 \n" + " ".join([str(a) for a in b]) +'\n')
             else:
                 continue
 
@@ -59,7 +59,7 @@ def writeConversions():
     wd = getcwd()
     if not os.path.exists('labels/'):
         os.makedirs('labels/')
-    list_file = open('training_list.txt', 'w')
+    list_file = open('train.list', 'w')
     print "Conversion Started!"
     with open('udacity.csv', 'rb') as csvfile:
         reader = csv.reader(csvfile, delimiter=' ',quotechar='"')
@@ -95,13 +95,12 @@ def convertToDarknet():
             if(len(line) > 2):
                 elems = line.split(' ')
                 xmin = elems[0]
-                xmax = elems[1]
-                ymin = elems[2]
+                ymin = elems[1]
+                xmax = elems[2]
                 ymax = elems[3]
-
                 w= 1920
                 h= 1080
-                b = (float(xmin), float(xmax), float(ymin), float(ymax))
+                b = (float(xmin), float(ymin), float(xmax), float(ymax))
                 bb = convert((w,h), b)
                 txt_outfile.write(str(cls_id) + " " + " ".join([str(a) for a in bb]) + '\n')
             else:

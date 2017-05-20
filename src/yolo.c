@@ -6,12 +6,12 @@
 #include "box.h"
 #include "demo.h"
 
-char *voc_names[] = {"aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"};
+char *voc_names[] = {"car","truck"};
 
 void train_yolo(char *cfgfile, char *weightfile)
 {
-    char *train_images = "/data/voc/train.txt";
-    char *backup_directory = "/home/pjreddie/backup/";
+    char *train_images = "/home/khaled/Desktop/Kiki/darknet/train.list";
+    char *backup_directory = "/home/khaled/backup/";
     srand(time(0));
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
